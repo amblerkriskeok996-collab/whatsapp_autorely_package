@@ -6,11 +6,13 @@ This package contains:
 - Milvus + RAG service: `services/milvus`
 - Install/start/stop scripts: `scripts/*.ps1`
 
+Use this README from the extracted package root folder (the folder containing this file).
+
 ## 1) Prerequisites
 - Windows + PowerShell
 - Conda
 - Docker Desktop
-- Odoo source (default: `D:\code\programs\odoo`)
+- An Odoo source folder (for example: `C:\work\odoo`)
 
 Recommended conda envs:
 - `odoo`
@@ -19,14 +21,14 @@ Recommended conda envs:
 
 ## 2) Install the Odoo App
 ```powershell
-cd D:\code\programs\whatsapp_autorely_package\scripts
-.\install_odoo_addon.ps1 -OdooRoot D:\code\programs\odoo -TargetAddonsDir custom_addons -UpgradeModule
+cd .\scripts
+.\install_odoo_addon.ps1 -OdooRoot "C:\path\to\your\odoo" -TargetAddonsDir custom_addons -UpgradeModule
 ```
 
 ## 3) Start Required Services
 One command:
 ```powershell
-cd D:\code\programs\whatsapp_autorely_package\scripts
+cd .\scripts
 .\start_all.ps1
 ```
 
@@ -51,7 +53,7 @@ Invoke-WebRequest http://127.0.0.1:3000/api/account/status -UseBasicParsing
 
 ## 6) End-to-End Mock Test
 ```powershell
-cd D:\code\programs\whatsapp_autorely_package\services\whatsapp-web
+cd .\services\whatsapp-web
 node tools\mock-incoming-8617628627274.js --api-url http://127.0.0.1:3000/webhook/whatsapp-workflow --body "I want to know DRG cost range for heart transplant"
 ```
 
@@ -63,7 +65,7 @@ Expected response fields:
 
 ## 7) Stop Services
 ```powershell
-cd D:\code\programs\whatsapp_autorely_package\scripts
+cd .\scripts
 .\stop_all.ps1              # stop RAG + webhook
 .\stop_all.ps1 -StopMilvus  # stop RAG + webhook + Milvus docker
 ```
