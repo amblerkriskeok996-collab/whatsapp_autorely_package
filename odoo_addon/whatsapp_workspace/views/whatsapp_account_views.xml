@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_whatsapp_workspace_account_list" model="ir.ui.view">
+        <field name="name">whatsapp.workspace.account.list</field>
+        <field name="model">whatsapp.workspace.account</field>
+        <field name="arch" type="xml">
+            <list string="WhatsApp Accounts">
+                <field name="name"/>
+                <field name="api_base_url"/>
+                <field name="portal_state"/>
+                <field name="wa_state"/>
+                <field name="login_allowed"/>
+                <field name="last_checked_at"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_whatsapp_workspace_account_form" model="ir.ui.view">
+        <field name="name">whatsapp.workspace.account.form</field>
+        <field name="model">whatsapp.workspace.account</field>
+        <field name="arch" type="xml">
+            <form string="WhatsApp Account">
+                <header>
+                    <button name="action_login" type="object" string="Login" class="oe_highlight"/>
+                    <button name="action_open_scan_page" type="object" string="Open QR Page" class="oe_highlight"/>
+                    <button name="action_sync_status" type="object" string="Sync Status" class="oe_highlight"/>
+                    <button name="action_switch_account_and_open_scan" type="object" string="Switch &amp; Re-Scan"/>
+                    <button name="action_open_account_home" type="object" string="Open Account Home"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="api_base_url"/>
+                            <field name="portal_state" readonly="1"/>
+                            <field name="portal_detail" readonly="1"/>
+                            <field name="wa_state" readonly="1"/>
+                            <field name="last_checked_at" readonly="1"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="login_allowed" readonly="1"/>
+                            <field name="login_message" readonly="1"/>
+                            <field name="account_wid" readonly="1"/>
+                            <field name="account_push_name" readonly="1"/>
+                            <field name="account_platform" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" readonly="1"/>
+                        <field name="raw_payload" readonly="1" widget="text"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_whatsapp_workspace_account_search" model="ir.ui.view">
+        <field name="name">whatsapp.workspace.account.search</field>
+        <field name="model">whatsapp.workspace.account</field>
+        <field name="arch" type="xml">
+            <search string="Search WhatsApp Accounts">
+                <field name="name"/>
+                <field name="api_base_url"/>
+                <field name="portal_state"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_whatsapp_workspace_account" model="ir.actions.act_window">
+        <field name="name">Accounts</field>
+        <field name="res_model">whatsapp.workspace.account</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_whatsapp_workspace_account_search"/>
+    </record>
+</odoo>

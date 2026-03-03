@@ -1,0 +1,6 @@
+[2026-02-27 15:25:08] Feature update: Deployed local Milvus stack, implemented BM25 ingestion/query/API, added local BM25 training/query pipeline, and wrote PROJECT_OVERVIEW.md.
+[2026-02-27 15:25:08] Push decision: yes
+
+[2026-02-27 15:30:29] Push target: https://github.com/amblerkriskeok996-collab/milvus
+[2026-02-27 15:34:13] Cleanup: removed stray file 3.9.1.
+[2026-02-27 15:34:13] Push decision: yes

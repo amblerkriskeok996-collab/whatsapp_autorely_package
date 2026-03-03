@@ -1,0 +1,160 @@
+﻿[2026-02-27 15:24:56]
+summary=single-instance startup + foreground live logs + overview updates
+push_decision=yes
+push_status=pending
+
+
+[2026-02-27 15:35:30]
+summary=add incoming-message simulation script for webhook api validation
+push_decision=pending
+push_status=pending
+=== KEY STEP ENTRY START ===
+timestamp: 2026-02-27 15:48:53
+project_root: D:\code\programs\Whatsapp\whatsapp-web
+branch: main
+implemented_change:
+- add end-to-end simulation support for inbound + optional forced reply webhook
+- add unit tests for phone normalization, payload building, and flag parsing
+files_changed:
+- tools/simulate-incoming-message.js
+- tests/simulate-incoming-message.test.js
+local_verification:
+- conda run -n Whatsapp npm run test-single tests/simulate-incoming-message.test.js (passed)
+- node tools/simulate-incoming-message.js --body "????????" --with-reply --reply-message "????:???????(????????)" (passed, reply webhook returned success)
+push: yes
+push_note: pushed to origin/main, commit 8750500
+=== KEY STEP ENTRY END ===
+=== KEY STEP ENTRY START ===
+timestamp: 2026-02-27 18:20:35
+project_root: D:\code\programs\Whatsapp\whatsapp-web
+branch: main
+implemented_change:
+- add medical AI auto-reply pipeline for inbound user messages in example.js
+- add structured triage + optional Milvus RAG search + final response generation module
+- add env templates for AI and RAG routing
+files_changed:
+- example.js
+- src/medicalAiAssistant.js
+- tests/medical-ai-assistant.test.js
+- .env.example
+local_verification:
+- conda run -n Whatsapp npm run test-single tests/medical-ai-assistant.test.js (passed)
+- node --check example.js (passed)
+push: pending
+push_note: waiting for user confirmation
+=== KEY STEP ENTRY END ===
+=== KEY STEP ENTRY START ===
+timestamp: 2026-02-27 19:12:15
+project_root: D:\code\programs\Whatsapp\whatsapp-web
+branch: main
+implemented_change:
+- add code-based webhook workflow endpoint `/webhook/whatsapp-workflow` in example.js
+- normalize full inbound message payload (sender/recipient/sentAt/messageContent/quotedMessage) in src/webhookPayload.js
+- add AI triage + optional RAG + fallback reply pipeline wrapper in src/webhookWorkflow.js
+- update webhook forwarding defaults and env template to support local webhook workflow
+- add unit tests for webhook payload + webhook workflow behavior
+files_changed:
+- example.js
+- src/webhookPayload.js
+- src/webhookWorkflow.js
+- tests/webhook-payload.test.js
+- tests/webhook-workflow.test.js
+- tools/simulate-incoming-message.js
+- .env.example
+local_verification:
+- conda run -n whatsapp-web node --check example.js (passed)
+- conda run -n whatsapp-web node --check src/webhookPayload.js (passed)
+- conda run -n whatsapp-web node --check src/webhookWorkflow.js (passed)
+- conda run -n whatsapp-web npm run test-single -- tests/simulate-incoming-message.test.js tests/webhook-payload.test.js tests/webhook-workflow.test.js tests/medical-ai-assistant.test.js (passed)
+push: pending
+push_note: waiting for user confirmation
+=== KEY STEP ENTRY END ===
+=== KEY STEP ENTRY START ===
+timestamp: 2026-02-27 20:53:45
+project_root: D:\code\programs\Whatsapp\whatsapp-web
+branch: main
+implemented_change:
+- add dedicated mock sender script for fixed user 8617628627274@c.us
+- support payload generation and post to webhook workflow endpoint for inbound-message testing
+- add unit test coverage for fixed sender and payload shape
+files_changed:
+- tools/mock-incoming-8617628627274.js
+- tests/mock-incoming-8617628627274.test.js
+local_verification:
+- conda run -n whatsapp-web npm run test-single -- tests/mock-incoming-8617628627274.test.js tests/webhook-workflow.test.js (passed)
+- conda run -n whatsapp-web node tools/mock-incoming-8617628627274.js --dry-run --body "test from fixed mock user" (passed)
+push: pending
+push_note: waiting for user confirmation
+=== KEY STEP ENTRY END ===
+=== KEY STEP ENTRY START ===
+timestamp: 2026-02-27 21:03:47
+project_root: D:\code\programs\Whatsapp\whatsapp-web
+branch: main
+implemented_change:
+- update fixed mock sender tool to default autoSendReply=true and support --auto-send false
+- verify webhook workflow sends AI reply back to sender jid 8617628627274@c.us
+files_changed:
+- tools/mock-incoming-8617628627274.js
+- tests/mock-incoming-8617628627274.test.js
+local_verification:
+- conda run -n whatsapp-web npm run test-single -- tests/mock-incoming-8617628627274.test.js tests/webhook-workflow.test.js (passed)
+- node tools/mock-incoming-8617628627274.js --api-url http://localhost:3000/webhook/whatsapp-workflow --body ?????????????? (passed)
+- webhook response delivery.sent=true and delivery.to=8617628627274@c.us
+push: yes
+push_note: pushed to origin/main commit 7a39d9c
+=== KEY STEP ENTRY END ===
+=== KEY STEP ENTRY START ===
+timestamp: 2026-02-27 21:12:10
+project_root: D:\code\programs\Whatsapp\whatsapp-web
+branch: main
+implemented_change:
+- Added explicit RAG endpoint binding for whatsapp-web runtime.
+- Set RAG_API_URL to local Milvus RAG API at http://127.0.0.1:18080.
+files_changed:
+- .env
+local_verification:
+- rg -n "^RAG_API_URL=http://127\.0\.0\.1:18080$" .env -> passed (line 4)
+push: yes
+push_note: pushed to origin/main commit 7a39d9c
+=== KEY STEP ENTRY END ===
+=== KEY STEP ENTRY START ===
+timestamp: 2026-02-28 13:38:13
+project_root: D:\code\programs\Whatsapp\whatsapp-web
+branch: main
+implemented_change:
+- add account-management frontend with login and switch-account actions
+- add account portal APIs in example.js for status, login redirect, and session cleanup + reinitialize
+- add portal state module and unit tests to enforce relogin and switching states
+files_changed:
+- example.js
+- public/account-portal.html
+- public/account-home.html
+- src/accountPortalState.js
+- tests/account-portal-state.test.js
+local_verification:
+- conda run -n whatsapp-web npm run test-single -- tests/account-portal-state.test.js (passed)
+- conda run -n whatsapp-web node --check example.js (passed)
+push: yes
+push_note: pushed to origin/main commit deaa608
+=== KEY STEP ENTRY END ===
+=== KEY STEP ENTRY START ===
+timestamp: 2026-02-28 14:31:06
+project_root: D:\code\programs\Whatsapp\whatsapp-web
+branch: main
+implemented_change:
+- fix login-button flow to recover from closed Puppeteer page session and reopen logged-in WhatsApp home
+- add portal login recovery helper for single retry on recoverable session-closed errors
+- keep expired-account behavior: return relogin prompt when recovery lands in qr/auth-failure/disconnected
+files_changed:
+- example.js
+- src/portalLoginRecovery.js
+- tests/portal-login-recovery.test.js
+local_verification:
+- conda run -n whatsapp-web npm run test-single -- tests/portal-login-recovery.test.js tests/whatsapp-portal-config.test.js tests/account-portal-state.test.js (passed)
+- conda run -n whatsapp-web node --check example.js (passed)
+- conda run -n whatsapp-web node --check src/portalLoginRecovery.js (passed)
+- POST http://127.0.0.1:3000/api/account/login returned 200 with openedUrl=https://web.whatsapp.com/ (passed)
+push: yes
+push_note: pushed to origin/main commit deaa608
+=== KEY STEP ENTRY END ===
+

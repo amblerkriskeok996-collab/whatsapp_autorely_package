@@ -1,0 +1,23 @@
+# Runtime
+runtime/logs/
+runtime/pids/
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+**/node_modules/
+npm-debug.log*
+
+# WhatsApp session/cache
+services/whatsapp-web/.wwebjs_auth/
+services/whatsapp-web/.wwebjs_cache/
+
+# Local env/secrets
+**/.env
+**/.env.local
+
+# OS/editor
+.DS_Store
+Thumbs.db

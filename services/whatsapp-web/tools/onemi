@@ -1,0 +1,4 @@
+$env:Path = "C:\Program Files\nodejs;" + $env:Path
+node example.js
+#del profile
+rm -r -fo .\.wwebjs_auth\session

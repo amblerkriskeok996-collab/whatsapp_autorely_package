@@ -1,0 +1,102 @@
+﻿项目名称：whatsapp-web（基于 WhatsApp Web 的 Node.js 客户端库）
+版本：1.34.6
+核心定位：通过 Puppeteer 驱动 web.whatsapp.com，注入内部模块（Store/AuthStore/WWebJS），对外提供可编程 API 与事件流，用于机器人、自动化消息处理、会话管理。
+
+1. 项目主要能力
+- 连接与登录：支持二维码登录、手机号配对码登录。
+- 会话持久化：支持无持久化（NoAuth）、本地目录会话（LocalAuth）、远程存储会话（RemoteAuth）。
+- 消息能力：发送文本、图片/视频/语音/文档、贴纸、位置、联系人、投票、活动等；支持引用、@提及、群提及、链接预览、已读回执。
+- 事件能力：消息接收/创建/撤回/编辑/ACK、群成员变更、连接状态变化、来电、投票更新、reaction 等。
+- 数据查询：聊天列表、联系人、消息搜索等。
+- 频道/状态支持：对频道（newsletter）与状态（broadcast）有单独发送路径与能力限制。
+
+2. 入口与导出
+- 入口文件：index.js
+- 主要导出：Client、Auth Strategies（NoAuth/LocalAuth/RemoteAuth）、结构体（Message/Chat/Contact 等）、常量（Events/WAState/MessageTypes）。
+
+3. 核心目录结构
+- src/Client.js：核心运行时（浏览器启动、注入、事件桥接、API实现）。
+- src/util/Injected/*.js：注入到 WhatsApp Web 页面上下文的逻辑。
+  - AuthStore：鉴权相关内部模块暴露。
+  - Store：大量 WA 内部模块映射到 window.Store。
+  - Utils：window.WWebJS 方法实现（发送消息、媒体处理、模型序列化等）。
+- src/authStrategies/*.js：会话策略抽象与实现。
+- src/webCache/*.js：WhatsApp Web 版本页面缓存（local/remote/none）。
+- src/structures/*.js：对聊天、消息、联系人等对象的封装。
+- src/factories/*.js：根据数据类型创建结构体实例（如 GroupChat/PrivateChat/Channel）。
+- tests/：集成测试（需真实 WhatsApp 会话与目标账号）。
+
+4. 核心实现逻辑（关键链路）
+A) Client 初始化链路（src/Client.js）
+1) constructor：合并默认配置（Util.mergeDefault），绑定 authStrategy（默认 NoAuth）。
+2) initialize：
+   - 调用 authStrategy.beforeBrowserInitialized()。
+   - 启动或连接 Puppeteer 浏览器，设置 UA/代理/CSP。
+   - initWebVersionCache()：可拦截 WhatsApp 首页请求并注入指定版本 HTML。
+   - 访问 https://web.whatsapp.com/ 后执行 inject()。
+3) inject：
+   - 等待 window.Debug.VERSION 就绪（鉴权超时控制）。
+   - 按版本注入 AuthStore（Comet 新版或 Legacy 兼容分支）。
+   - 判断是否需鉴权；若需要则走 authStrategy.onAuthenticationNeeded()。
+   - 注册二维码或手机号配对码事件。
+   - 同步完成后注入 Store + Utils，attachEventListeners()，再发出 READY。
+4) 页面重导航（framenavigated）时会重新 inject，确保运行时恢复。
+
+B) 事件桥接机制
+- Node 侧通过 exposeFunctionIfAbsent 暴露回调（onAddMessageEvent 等）。
+- 页面侧把 WA 内部模型事件（window.Store.Msg/Chat/AppState 等）转发到这些回调。
+- Client 再统一 emit 标准化事件（Events.*）。
+- 结果：上层业务只监听 Node 事件，无需直接操作浏览器上下文。
+
+C) 发消息链路
+1) Client.sendMessage(chatId, content, options)
+   - 先做类型/场景校验（频道、状态限制）。
+   - 归一化 options（mentions、groupMentions、quotedMessageId、media 等）。
+   - 贴纸场景调用 Util.formatToWebpSticker（必要时经 ffmpeg/webp 处理）。
+2) 下沉到页面：window.WWebJS.sendMessage(chat, content, options)
+   - 组装消息 payload 与上下文（媒体、引用、链接预览、投票、活动、vCard、bot 参数等）。
+   - 按目标类型分流：普通聊天、频道消息、状态消息走不同发送路径。
+
+5. 鉴权与会话策略
+- BaseAuthStrategy：统一生命周期接口（before/afterBrowserInitialized、onAuthenticationNeeded、afterAuthReady、logout、destroy 等）。
+- NoAuth：不持久化，每次都需重新扫码。
+- LocalAuth：把 Puppeteer userDataDir 固定到 ./.wwebjs_auth/session(-clientId)，本地持久化。
+- RemoteAuth：
+  - 启动前从远程 store 拉取压缩会话并解压。
+  - 鉴权稳定后周期性备份（backupSyncIntervalMs，>=60s）。
+  - 仅同步关键目录（Default、IndexedDB、Local Storage）。
+
+6. Web 版本缓存机制
+- WebCacheFactory: local / remote / none。
+- local：从 ./.wwebjs_cache/<version>.html 读取与持久化。
+- remote：从远端地址模板拉取版本 HTML。
+- 若命中缓存：拦截首页请求并直接返回缓存 HTML；否则记录在线页面用于后续缓存。
+
+7. 关键依赖与运行条件
+- Node.js >= 18。
+- 主要依赖：puppeteer、@pedroslopez/moduleraid、fluent-ffmpeg、node-webpmux、node-fetch。
+- 说明：此项目属于非官方接入方案，存在被平台限制/封禁风险（README 已明确）。
+
+8. 测试与验证
+- 命令：npm test（mocha）。
+- 测试类型：以集成为主，依赖真实登录态和可发消息目标账号。
+- 关键环境变量见 tests/README.md（如 WWEBJS_TEST_REMOTE_ID、WWEBJS_TEST_CLIENT_ID 等）。
+
+9. 给接入方 AI 的快速理解建议
+- 先看：src/Client.js（主流程）-> src/util/Injected/Utils.js（功能实现）-> authStrategies（会话）-> webCache（版本控制）。
+- 扩展新能力时优先复用 window.WWebJS 既有能力，避免直接散落调用 window.Store。
+- 升级 WhatsApp Web 版本时重点关注 Injected/Store.js 的模块映射是否失效。
+
+10. 本地运行端口记录（2026-02-27）
+- 已按“从 8080 开始，端口占用则递增”策略启动示例 HTTP 服务，最终端口：8082。
+- 服务入口：`http://localhost:8082/webhook/reply`
+- 当前运行进程（最近一次）：node PID 24524（启动时间 2026-02-27 15:13）。
+- 启动脚本：`tools/start-example-server.ps1`（支持传入 `-Port`）。
+- 单实例实时日志启动：`.\tools\start-example-server.ps1 -Port 8080 -Foreground`（会先清理旧的 example.js 进程，只保留一个实例）。
+- 日志文件：`logs/example-8082.out.log`、`logs/example-8082.err.log`。
+
+11. 最近变更说明（前端启动与日志）
+- 已修复“重复启动导致弹出多个 WhatsApp 页面”的问题：`tools/start-example-server.ps1` 启动前会自动清理旧的 `example.js` Node 进程，保证单实例。
+- 已支持“终端实时日志”启动模式：使用 `-Foreground` 参数前台运行，stdout/stderr 直接输出到终端，便于看二维码和登录状态。
+- `example.js` 已支持通过环境变量 `SERVER_PORT` 指定端口，配合启动脚本实现 8080 起自动探测空闲端口。
+- 推荐命令（实时日志 + 单实例 + 自动端口）：`.\tools\start-example-server.ps1 -Port 8080 -Foreground`

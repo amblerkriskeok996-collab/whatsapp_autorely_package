@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command:*)",
+      "Bash(cmd /c \"set PATH=C:\\\\Program Files\\\\nodejs;%PATH% && cd /d D:\\\\code\\\\whatsapp-web && npm list qrcode-terminal 2>&1\")"
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_whatsapp_workspace" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.whatsapp.workspace</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='integration']" position="after">
+                <block title="WhatsApp Workspace" name="whatsapp_workspace_block">
+                    <setting string="Workspace Root Path" help="Absolute path to the standalone Whatsapp workspace project.">
+                        <field name="whatsapp_workspace_root_path"/>
+                    </setting>
+                    <setting string="WhatsApp API Base URL" help="Base URL for whatsapp-web service, for example http://127.0.0.1:3000">
+                        <field name="whatsapp_workspace_api_base_url"/>
+                    </setting>
+                    <setting string="RAG API Base URL" help="Base URL for Milvus RAG service, for example http://127.0.0.1:18080">
+                        <field name="whatsapp_workspace_rag_api_base_url"/>
+                    </setting>
+                    <setting string="whatsapp-web example.js Service" help="Optional controls. Starts/stops node whatsapp-web/example.js using Workspace Root Path.">
+                        <button name="action_start_whatsapp_web_example" type="object" string="Start example.js" class="btn btn-primary"/>
+                        <button name="action_stop_whatsapp_web_example" type="object" string="Stop example.js" class="btn btn-secondary"/>
+                    </setting>
+                    <setting string="Webhook Forward URL" help="Optional target webhook URL. Incoming payload to /whatsapp_workspace/webhook/incoming will be forwarded there.">
+                        <field name="whatsapp_workspace_webhook_forward_url"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_whatsapp_workspace_settings" model="ir.actions.act_window">
+        <field name="name">WhatsApp Workspace Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'whatsapp_workspace'}</field>
+    </record>
+</odoo>

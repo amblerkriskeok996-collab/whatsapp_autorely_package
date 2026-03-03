@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_whatsapp_workspace_root" name="WhatsApp Workspace" sequence="96"/>
+    <menuitem id="menu_whatsapp_workspace_accounts" name="Accounts" parent="menu_whatsapp_workspace_root" action="action_whatsapp_workspace_account" sequence="10"/>
+    <menuitem id="menu_whatsapp_workspace_settings" name="Settings" parent="menu_whatsapp_workspace_root" action="action_whatsapp_workspace_settings" sequence="40"/>
+</odoo>
